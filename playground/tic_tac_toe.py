@@ -12,18 +12,18 @@ players = {'1': '', '2': ''}
 def draw_table():
     os.system('cls')
     print('')
-    print(f'  1 | {table["a1"]} | {table["b1"]} | {table["c1"]} |')
-    print('  ---------------')
-    print(f'  2 | {table["a2"]} | {table["b2"]} | {table["c2"]} |')
-    print('  ---------------')
-    print(f'  3 | {table["a3"]} | {table["b3"]} | {table["c3"]} |')
-    print(f'  ---------------')
-    print('      A   B   C   ')
+    print('       -----------')
+    print(f'  1   | {table["a1"]} | {table["b1"]} | {table["c1"]} |')
+    print('       -----------')
+    print(f'  2   | {table["a2"]} | {table["b2"]} | {table["c2"]} |')
+    print('       -----------')
+    print(f'  3   | {table["a3"]} | {table["b3"]} | {table["c3"]} |')
+    print(f'       -----------')
+    print('        a   b   c   ')
 
 
 # Draw message
 def draw_message(msg=''):
-    draw_table()
     print(msg)
 
 
@@ -41,9 +41,10 @@ def pick_x(player):
     if str(response).lower() not in options:
         return False
     else:
-        players[str(player)] = str(response).lower()
+        players[str(player)] = str(response).upper()
         options.remove(str(response).lower())
-        players[str(3 - player)] = options[0]
+        players[str(3 - player)] = options[0].upper()
+        draw_table()
         return True
 
 
@@ -74,13 +75,13 @@ def play_game():
             if not symbol_picked:
                 continue
 
-        draw_message("(Press 'q' to quit anytime)")
+        draw_message("(Press 'a1', 'c3' etc. to play, 'q' to quit anytime)")
         response = prompter(player)
         if response == 'q':
             sys.exit(0)
         if check_response(player, response) != 'valid':
             continue
-        save_response(player, response)
+        save_response(player, response.lower())
         check_winner()
 
         i += 1

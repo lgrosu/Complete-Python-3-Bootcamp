@@ -36,14 +36,23 @@ vari = 104.32442343241241344
 #
 # print(old_macdonald('macdonald'))
 
-import string
+import os
+some = ''
+i = 0
 
+while True:
+    os.system('cls')
+    print('1 | X | X | X |')
+    print('---------------')
+    print('2 | X | 0 | O |')
+    print('---------------')
+    print('3 | 0 | X | O |')
+    print('---------------')
+    print('    A   B   C   ')
 
-def ispangram(str1, abc=string.ascii_lowercase):
-    for letter in str1:
-        if letter.lower() in abc:
-            abc.replace(letter.lower(), "")
-    print(abc)
+    print(some)
+    some = input(f'Player {i % 2 + 1} >>')
+    i += 1
+    if some == 'q':
+        break
 
-
-ispangram("The quick brown fox jumps over the lazy dog")

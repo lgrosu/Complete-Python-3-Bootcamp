@@ -22,17 +22,28 @@ def draw_table():
     print('        a   b   c   ')
 
 
+# Clear Data
+def clear_data():
+    global table
+    global players
+    table = {'a1': ' ', 'a2': ' ', 'a3': ' ', 'b1': ' ', 'b2': ' ', 'b3': ' ', 'c1': ' ', 'c2': ' ', 'c3': ' '}
+    players = {'1': '', '2': ''}
+
+
 # Draw message
 def draw_message(msg=''):
     print(msg)
 
 
 # Draw prompter
-def prompter(player):
-    return input(f'Player {player} >>')
+def prompter(player=0):
+    if player:
+        return input(f'Player {player} >>')
+    else:
+        return input(' >>')
 
 
-# Pick symbols
+# Pick symbols (X or O)
 def pick_x(player):
     options = ['x', 'o']
     draw_message("Pick letter 'X' or letter 'O':")
@@ -50,17 +61,34 @@ def pick_x(player):
 
 # Check response
 def check_response(player, response):
-    return 'valid'
+    already_filled_cells = list({k: v for k, v in table.items() if v != ' '})
+    if response in already_filled_cells or response not in list(table):
+        return 'invalid'
+    else:
+        return 'valid'
 
 
 # Save response
 def save_response(player, response):
-    table[response] = players[str(player).upper()]
+    table[response] = players[str(player)].upper()
 
 
 # Check winner
-def check_winner():
-    pass
+def check_winner(player):
+    ocupate = list({k: v for k, v in table.items() if v == players[str(player)].upper()})
+    if ('a1' in ocupate and 'b1' in ocupate and 'c1' in ocupate) or (
+            'a2' in ocupate and 'b2' in ocupate and 'c2' in ocupate) or (
+            'a3' in ocupate and 'b3' in ocupate and 'c3' in ocupate) or (
+            'a1' in ocupate and 'a2' in ocupate and 'a3' in ocupate) or (
+            'b1' in ocupate and 'b2' in ocupate and 'b3' in ocupate) or (
+            'c1' in ocupate and 'c2' in ocupate and 'c3' in ocupate) or (
+            'a1' in ocupate and 'b2' in ocupate and 'c3' in ocupate) or (
+            'a3' in ocupate and 'b2' in ocupate and 'c1' in ocupate):
+        return player
+    elif len({k: v for k, v in table.items() if v != ' '}) == 9:
+        return 3
+    else:
+        return 0
 
 
 # Play
@@ -70,22 +98,41 @@ def play_game():
     while True:
         player = i % 2 + 1
         draw_table()
-        if i == 0:
+
+        if i == 0 and players['1'] == '':
             symbol_picked = pick_x(player)
             if not symbol_picked:
+                continue
+
+        winner = check_winner(3 - player)
+        if winner:
+            if winner == 3:
+                draw_message("Draw! Play again? (y/n)")
+            else:
+                draw_message(f"Player {winner} won! Play again? (y/n)")
+            play_again = prompter()
+            if play_again.lower() == 'y':
+                clear_data()
+                return
+            elif play_again.lower() == 'n':
+                return 'game_over'
+            else:
                 continue
 
         draw_message("(Press 'a1', 'c3' etc. to play, 'q' to quit anytime)")
         response = prompter(player)
         if response == 'q':
             sys.exit(0)
+
         if check_response(player, response) != 'valid':
             continue
-        save_response(player, response.lower())
-        check_winner()
 
+        save_response(player, response.lower())
         i += 1
 
 
 # MAIN ENTRY
-play_game()
+while True:
+    message = play_game()
+    if message == 'game_over':
+        break

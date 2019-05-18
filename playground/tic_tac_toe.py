@@ -76,14 +76,16 @@ def save_response(player, response):
 # Check winner
 def check_winner(player):
     ocupate = list({k: v for k, v in table.items() if v == players[str(player)].upper()})
-    if ('a1' in ocupate and 'b1' in ocupate and 'c1' in ocupate) or (
+    if (
+            'a1' in ocupate and 'b1' in ocupate and 'c1' in ocupate) or (
             'a2' in ocupate and 'b2' in ocupate and 'c2' in ocupate) or (
             'a3' in ocupate and 'b3' in ocupate and 'c3' in ocupate) or (
             'a1' in ocupate and 'a2' in ocupate and 'a3' in ocupate) or (
             'b1' in ocupate and 'b2' in ocupate and 'b3' in ocupate) or (
             'c1' in ocupate and 'c2' in ocupate and 'c3' in ocupate) or (
             'a1' in ocupate and 'b2' in ocupate and 'c3' in ocupate) or (
-            'a3' in ocupate and 'b2' in ocupate and 'c1' in ocupate):
+            'a3' in ocupate and 'b2' in ocupate and 'c1' in ocupate
+    ):
         return player
     elif len({k: v for k, v in table.items() if v != ' '}) == 9:
         return 3
@@ -131,8 +133,9 @@ def play_game():
         i += 1
 
 
-# MAIN ENTRY
-while True:
-    message = play_game()
-    if message == 'game_over':
-        break
+if __name__ == '__main__':
+    # MAIN ENTRY
+    while True:
+        message = play_game()
+        if message == 'game_over':
+            break

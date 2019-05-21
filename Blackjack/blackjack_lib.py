@@ -9,6 +9,9 @@ from colorama import init, Fore, Style
 init(autoreset=True)
 
 
+# ======================================================================================
+#
+# ======================================================================================
 class Card:
     suit_icon = {'H': u"\u2665", 'C': u"\u2663", 'S': u"\u2660", 'D': u"\u2666"}
     ranks = {'2': [2], '3': [3], '4': [4], '5': [5], '6': [6], '7': [7], '8': [8], '9': [9], '10': [10], 'A': [1, 11],
@@ -73,37 +76,28 @@ class Hand:
             for carte in self.cards:
                 hand_value[0] += carte.info['value'][0]
                 if len(carte.info['value']) > 1:  # e As
-                    hand_value[1] += carte.info['value'][1] #@todo tb facut loop. crapa la doi asi
+                    hand_value[1] += carte.info['value'][1] - carte.info['value'][0]
+
+        hand_value[1] += hand_value[0]
         return hand_value
 
     def __str__(self):
         return_string = ''
         for c in self.cards:
-            return_string += f"\n{c.info['rank']} {c.info['suit']}\n"
+            return_string += f" {c.info['rank']} {c.info['suit']}  "  # @todo-Rosi => Preaty Print
         return return_string
 
 
 my_deck = Deck()
 my_deck.shuffle()
-
-print(my_deck)
-
 hand = Hand()
 
-card = my_deck.deal()
-hand.add_card(card)
-
-card = my_deck.deal()
-hand.add_card(card)
-
-card = my_deck.deal()
-hand.add_card(card)
+hand.add_card(my_deck.deal())
+hand.add_card(my_deck.deal())
+hand.add_card(my_deck.deal())
 
 print(hand.eval())
-for item in hand.cards:
-    print(item)
-
-
+print(hand)
 
 # print(card.info)
 

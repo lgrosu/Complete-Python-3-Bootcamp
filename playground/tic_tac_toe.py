@@ -84,8 +84,7 @@ def check_winner(player):
             'b1' in ocupate and 'b2' in ocupate and 'b3' in ocupate) or (
             'c1' in ocupate and 'c2' in ocupate and 'c3' in ocupate) or (
             'a1' in ocupate and 'b2' in ocupate and 'c3' in ocupate) or (
-            'a3' in ocupate and 'b2' in ocupate and 'c1' in ocupate
-    ):
+            'a3' in ocupate and 'b2' in ocupate and 'c1' in ocupate):
         return player
     elif len({k: v for k, v in table.items() if v != ' '}) == 9:
         return 3
@@ -113,6 +112,7 @@ def play_game():
             else:
                 draw_message(f"Player {winner} won! Play again? (y/n)")
             play_again = prompter()
+
             if play_again.lower() == 'y':
                 clear_data()
                 return

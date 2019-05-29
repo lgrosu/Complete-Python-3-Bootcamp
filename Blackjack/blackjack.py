@@ -5,6 +5,8 @@ from Modules import blackjack_lib
 import os
 import sys
 import shutil
+import time
+from colorama import init, Fore, Style
 
 # ======================================================================================
 #  Initializeaza obiectele
@@ -17,12 +19,7 @@ deck.shuffle()
 
 # creaza mainile pt jucator si pentru dealer
 player_hand = blackjack_lib.Hand()
-player_hand.add_card(deck.deal())
-player_hand.add_card(deck.deal())
-
 dealer_hand = blackjack_lib.Hand()
-dealer_hand.add_card(deck.deal())
-dealer_hand.add_card(deck.deal())
 
 # creaza potul
 pot = blackjack_lib.Pot()
@@ -42,23 +39,48 @@ def redraw_screen():
     os.system('cls')
 
     print('')
-    print('=' * (shutil.get_terminal_size()[0] - 1))
+    print(' ' + '=' * (shutil.get_terminal_size()[0] - 2))
     print(' ' * number_of_spaces + 'BLACKJACK')
-    print('-' * (shutil.get_terminal_size()[0] - 1))
-    print(f'Stack: {stack}' + ' ' * (screen_width - len(f'Stack: {stack}') - 1 - len(f'Bet: {pot}')) + f'Bet: {pot}')
-    print('=' * (shutil.get_terminal_size()[0] - 1))
+    print(' ' + '-' * (shutil.get_terminal_size()[0] - 2))
+    print(f' Stack: {stack}' + ' ' * (screen_width - len(f'Stack: {stack}') - 2 - len(f'Bet: {pot}')) + f'Bet: {pot}')
+    print(' ' + '=' * (shutil.get_terminal_size()[0] - 2))
 
-    print(f'Dealer: {dealer_hand}')
+    print(f' Dealer:{dealer_hand}')
+    if player_hand.cards:
+        eval_count = len(f'Hand value: {str(player_hand.eval()[0])}')
+        if player_hand.eval()[0] > 21:
+            eval_string = f'Hand value: {Style.BRIGHT + Fore.RED + str(player_hand.eval()[0]) + Style.RESET_ALL}'
+        else:
+            eval_string = f'Hand value: {Style.BRIGHT + Fore.BLUE + str(player_hand.eval()[0]) + Style.RESET_ALL}'
 
-    eval_string = ' Value: '
-    for i in range(len(player_hand.eval())):
-        eval_string += f'or  {player_hand.eval()[i]}'
+        for i in range(1, len(player_hand.eval())):
+            eval_count += len(f' or {str(player_hand.eval()[i])}')
+            if player_hand.eval()[i] > 21:
+                eval_string += f' or {Style.BRIGHT + Fore.RED + str(player_hand.eval()[i]) + Style.RESET_ALL}'
+            else:
+                eval_string += f' or {Style.BRIGHT + Fore.BLUE + str(player_hand.eval()[i]) + Style.RESET_ALL}'
 
+        print(f' Player:{player_hand}' + ' ' * (
+                screen_width - player_hand.number_of_chars - 9 - eval_count) + eval_string)
 
-    if player_hand.eval()[0] == player_hand.eval()[1]:
-        print(f'Player: {player_hand} Value: {player_hand.eval()[0]}')
     else:
-        print(f'Player: {player_hand} Value: {player_hand.eval()[0]} or {player_hand.eval()[1]}')
+        print(' Player:')
+
+    print(' ' + '=' * (shutil.get_terminal_size()[0] - 2))
+
 
 
 redraw_screen()
+
+for i in range(2):
+    time.sleep(0.1)
+    dealer_hand.add_card(deck.deal())
+    redraw_screen()
+
+time.sleep(0.1)
+
+for i in range(6):
+    time.sleep(0.1)
+    player_hand.add_card(deck.deal())
+    redraw_screen()
+

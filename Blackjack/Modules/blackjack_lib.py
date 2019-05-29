@@ -70,30 +70,35 @@ class Hand:
     # constructor
     def __init__(self):
         self.cards = []
+        self.number_of_chars = 0
 
     # adauga o carte in mana
     def add_card(self, carte):
         self.cards.append(carte)
 
-    # numară la cât s-a ajuns. Întoarce o listă pentru a fi evaluată (așii pot fi 1 sau 11)
+    # numară la cât s-a ajuns. Întoarce o listă cu valori unice pentru a fi evaluată (așii pot fi 1 sau 11)
     def eval(self):
         hand_value = [0]
         if self.cards:
             for carte in self.cards:
-                for i in range(0, len(hand_value) - 1):
+                for i in range(len(hand_value)):
                     hand_value[i] += carte.info['value'][0]
-                if len(carte.info['value']) > 1:  # e As
-                    for i in range(0, len(hand_value) - 1):
-                        hand_value.append(hand_value[i] + carte.info['value'][1])
+                if len(carte.info['value']) > 1:  # e As. Scot valoarea veche, o adaug pe cea noua si fac append
+                    for i in range(len(hand_value)):
+                        hand_value.append(hand_value[i] - carte.info['value'][0] + carte.info['value'][1])
+        return_list = list(set(hand_value))  # trec lista prin set ca sa scot duplicatele
+        return_list.sort()
+        return return_list
 
-        return list(set(hand_value))
+        # print hand
 
-    # print hand
     def __str__(self):
         return_string = ''
+        i = 0
         for c in self.cards:
-            return_string += f" {str(c.info['rank']).rjust(3)}{str(c.info['suit']).rjust(3)}  "
-
+            return_string += f"{str(c.info['rank']).rjust(3)}{str(c.info['suit']).rjust(3)}"
+            i += 1
+        self.number_of_chars = 4 * i  # am nevoie de numarul asta la formatarea ecranului
         return return_string
 
 
@@ -142,24 +147,3 @@ class Pot:
     # print
     def __str__(self):
         return str(self.sum)
-
-# my_deck = Deck()
-# my_deck.shuffle()
-# hand = Hand()
-#
-# hand.add_card(my_deck.deal())
-# hand.add_card(my_deck.deal())
-# hand.add_card(my_deck.deal())
-#
-# print(hand.eval())
-# print(hand)
-
-# print(card.info)
-
-# print(my_deck)
-#
-# print('' * 10)
-# print('Carti in mana:\n')
-# for i in range(5):
-#     card = my_deck.deal()
-#     print(card)

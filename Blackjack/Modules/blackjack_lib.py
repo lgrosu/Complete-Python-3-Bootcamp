@@ -10,7 +10,7 @@ init(autoreset=True)
 
 
 # ======================================================================================
-#
+#   O carte
 # ======================================================================================
 class Card:
     suit_icon = {'H': u"\u2665", 'C': u"\u2663", 'S': u"\u2660", 'D': u"\u2666"}
@@ -32,6 +32,9 @@ class Card:
         return f"{self.info['rank']} {self.info['suit']}"
 
 
+# ======================================================================================
+#  Pachetul de carti
+# ======================================================================================
 class Deck:
     suit = ['C', 'S', 'H', 'D']  # clubs, spades, hearts, diamonds
     cards = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
@@ -60,6 +63,9 @@ class Deck:
         return return_string
 
 
+# ======================================================================================
+#   Carti in mana
+# ======================================================================================
 class Hand:
     # constructor
     def __init__(self):
@@ -71,33 +77,82 @@ class Hand:
 
     # numară la cât s-a ajuns. Întoarce o listă pentru a fi evaluată (așii pot fi 1 sau 11)
     def eval(self):
-        hand_value = [0, 0]
+        hand_value = [0]
         if self.cards:
             for carte in self.cards:
-                hand_value[0] += carte.info['value'][0]
+                for i in range(0, len(hand_value) - 1):
+                    hand_value[i] += carte.info['value'][0]
                 if len(carte.info['value']) > 1:  # e As
-                    hand_value[1] += carte.info['value'][1] - carte.info['value'][0]
+                    for i in range(0, len(hand_value) - 1):
+                        hand_value.append(hand_value[i] + carte.info['value'][1])
 
-        hand_value[1] += hand_value[0]
-        return hand_value
+        return list(set(hand_value))
 
+    # print hand
     def __str__(self):
         return_string = ''
         for c in self.cards:
-            return_string += f" {c.info['rank']} {c.info['suit']}  "  # @todo-Rosi => Preaty Print
+            return_string += f" {str(c.info['rank']).rjust(3)}{str(c.info['suit']).rjust(3)}  "
+
         return return_string
 
 
-my_deck = Deck()
-my_deck.shuffle()
-hand = Hand()
+# ======================================================================================
+#   Banca
+# ======================================================================================
+class Stack:
+    # constructor
+    def __init__(self, ammount):
+        self.ammount = ammount
 
-hand.add_card(my_deck.deal())
-hand.add_card(my_deck.deal())
-hand.add_card(my_deck.deal())
+    # withdraw
+    def withdraw(self, bet):
+        if bet <= self.ammount:
+            self.ammount -= bet
+            return {'success': 1, 'balance': self.ammount}
+        else:
+            return {'success': 0, 'balance': self.ammount}
 
-print(hand.eval())
-print(hand)
+    # add to stack
+    def add(self, bet):
+        self.ammount += bet
+        return {'success': 1, 'balance': self.ammount}
+
+    # print stack
+    def __str__(self):
+        return str(self.ammount)
+
+
+# ======================================================================================
+#   Pot
+# ======================================================================================
+class Pot:
+    # constructor
+    def __init__(self):
+        self.sum = 0
+
+    # add to pot
+    def add(self, suma):
+        self.sum += suma
+
+    # clear pot
+    def clear(self):
+        self.sum = 0
+
+    # print
+    def __str__(self):
+        return str(self.sum)
+
+# my_deck = Deck()
+# my_deck.shuffle()
+# hand = Hand()
+#
+# hand.add_card(my_deck.deal())
+# hand.add_card(my_deck.deal())
+# hand.add_card(my_deck.deal())
+#
+# print(hand.eval())
+# print(hand)
 
 # print(card.info)
 

@@ -18,14 +18,16 @@ class Card:
              'J': [10], 'Q': [10], 'K': [10]}
 
     # constructor
-    def __init__(self, rank, suit):
+    def __init__(self, rank, suit, dummy=False):
         # cupa si caroul, cu rosu
         if suit == 'H' or suit == 'D':
             icon = Style.BRIGHT + Fore.RED + self.suit_icon[suit] + Style.RESET_ALL
         else:
             icon = Style.BRIGHT + self.suit_icon[suit] + Style.RESET_ALL
-
-        self.info = {'rank': rank, 'suit': icon, 'value': self.ranks[rank]}
+        if not dummy:
+            self.info = {'rank': rank, 'suit': icon, 'value': self.ranks[rank]}
+        else:
+            self.info = {'rank': u"\U0001F0CF", 'suit': '', 'value': [0]}
 
     # print card
     def __str__(self):
@@ -100,6 +102,22 @@ class Hand:
             i += 1
         self.number_of_chars = 4 * i  # am nevoie de numarul asta la formatarea ecranului
         return return_string
+
+
+class DealerHand(Hand):
+
+    def __init__(self):
+        Hand.__init__(self)
+        self.hidden_card = ''
+
+    def hide_card(self):
+        self.hidden_card = self.cards.pop()
+        self.cards.append(Card('A', 'C', True))
+
+    def unhide(self):
+        self.cards.pop()
+        self.cards.append(self.hidden_card)
+        self.hidden_card = ''
 
 
 # ======================================================================================

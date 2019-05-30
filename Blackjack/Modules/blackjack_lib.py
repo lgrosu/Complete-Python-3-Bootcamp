@@ -10,7 +10,7 @@ init(autoreset=True)
 
 
 # ======================================================================================
-#   O carte
+#   O carte...
 # ======================================================================================
 class Card:
     suit_icon = {'H': u"\u2665", 'C': u"\u2663", 'S': u"\u2660", 'D': u"\u2666"}
@@ -35,7 +35,7 @@ class Card:
 
 
 # ======================================================================================
-#  Pachetul de carti
+#  Pachetul de carti: o lista de instante ale clasei Card
 # ======================================================================================
 class Deck:
     suit = ['C', 'S', 'H', 'D']  # clubs, spades, hearts, diamonds
@@ -78,7 +78,7 @@ class Hand:
     def add_card(self, carte):
         self.cards.append(carte)
 
-    # numară la cât s-a ajuns. Întoarce o listă cu valori unice pentru a fi evaluată (așii pot fi 1 sau 11)
+    # numară până la cât s-a ajuns. Întoarce o listă cu valori unice pentru a fi evaluată (așii pot fi 1 sau 11)
     def eval(self):
         hand_value = [0]
         if self.cards:
@@ -92,8 +92,7 @@ class Hand:
         return_list.sort()
         return return_list
 
-        # print hand
-
+    # print hand
     def __str__(self):
         return_string = ''
         i = 0
@@ -104,16 +103,21 @@ class Hand:
         return return_string
 
 
+# ======================================================================================
+#   Extind clasa Hand ca sa tin minte cartea "intoarsa" a dealerului
+# ======================================================================================
 class DealerHand(Hand):
 
     def __init__(self):
         Hand.__init__(self)
         self.hidden_card = ''
 
+    # salveaza cartea si baga una dummy in schimb
     def hide_card(self):
         self.hidden_card = self.cards.pop()
         self.cards.append(Card('A', 'C', True))
 
+    # aduce la loc cartea salvata si o sterge pe cea dummy
     def unhide(self):
         self.cards.pop()
         self.cards.append(self.hidden_card)
@@ -147,7 +151,7 @@ class Stack:
 
 
 # ======================================================================================
-#   Pot
+#   Potul
 # ======================================================================================
 class Pot:
     # constructor

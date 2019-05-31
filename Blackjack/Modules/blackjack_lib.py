@@ -156,16 +156,22 @@ class Stack:
 class Pot:
     # constructor
     def __init__(self):
-        self.sum = 0
+        self.pot = 0
+        self.bet = 0
 
     # add to pot
     def add(self, suma):
-        self.sum += suma
+        self.pot += suma
+        self.bet += suma
 
     # clear pot
-    def clear(self):
-        self.sum = 0
+    def clear_pot(self):
+        self.pot = 0
+
+    # clear bet
+    def clear_bet(self):
+        self.bet = 0
 
     # print
     def __str__(self):
-        return str(self.sum)
+        return str(self.pot)

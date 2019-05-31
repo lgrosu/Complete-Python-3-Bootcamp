@@ -37,13 +37,13 @@ def main_stack():
         # ======================================================================================
         def redraw_screen():
             system('cls')
-            f = Figlet(font='bubble')
+            f = Figlet(font='big')
 
             print('')
             print(' ' + '=' * (get_terminal_size()[0] - 2))
             print(f.renderText('BLACKJACK'))
             print(' ' + '-' * (get_terminal_size()[0] - 2))
-            print(f' You have: {stack}' + ' ' * (screen_width - len(f'You have: {stack}') - 2 - len(f'Bet: {pot}')) + f'Bet: {pot}')
+            print(f' You have: {stack}' + ' ' * (screen_width - len(f'You have: {stack}') - 2 - len(f'Pot: {pot}')) + f'Pot: {pot}')
             print(' ' + '=' * (get_terminal_size()[0] - 2))
 
             # Dealer Line
@@ -116,6 +116,35 @@ def main_stack():
                 return 1
 
         # ======================================================================================
+        #  DOUBLE DOWN CHOICE
+        # ======================================================================================
+        def double_down():
+            response = stack.withdraw(pot.bet)
+            if response['success'] == 1:
+                pot.add(pot.bet)
+                return 0
+            else:
+                return 1
+
+        # ======================================================================================
+        #  SURRENDER CHOICE
+        # ======================================================================================
+        def surrender():
+            stack.add(pot.pot / 2)
+            pot.clear_bet()
+            pot.clear_pot()
+            return 0
+
+        # ======================================================================================
+        #  EVEN MONEY CHOICE
+        # ======================================================================================
+        def even_money():
+            stack.add(pot.bet)
+            pot.pot = pot.pot - pot.bet
+            pot.clear_bet()
+            return 0
+
+        # ======================================================================================
         #  PLAY HAND
         # ======================================================================================
         def play_hand(player='player'):
@@ -129,7 +158,73 @@ def main_stack():
         #  CHECK FOR WINNER
         # ======================================================================================
         def check_winner(turn='dealer'):
-            return 0
+            player_busted = True
+            dealer_busted = False
+            if turn != 'dealer':
+                for number in player_hand.eval():
+                    if number < 21:
+                        player_busted = False
+                    elif number == 21:
+                        stack.add(pot.pot * 2)
+                        pot.clear_bet()
+                        pot.clear_pot()
+                        return 'BLACKJACK!'
+
+                if player_busted:
+                    pot.clear_bet()
+                    pot.clear_pot()
+                    return 'Player BUSTED!'
+                return 0
+            else:
+                for number in dealer_hand.eval():
+                    if number < 21:
+                        dealer_busted = False
+                    elif number == 21:
+                        if 21 in player_hand.eval():
+                            pot.clear_bet()
+                            return 'PUSH!'
+                        else:
+                            pot.clear_bet()
+                            pot.clear_pot()
+                            return 'Dealer BLACKJACK! Dealer wins.'
+                if dealer_busted:
+                    stack.add(pot.pot)
+                    pot.clear_bet()
+                    pot.clear_pot()
+                    return 'Dealer BUSTED!'
+
+                player_list = [a for a in player_hand.eval() if a < 21]
+                dealer_list = [a for a in dealer_hand.eval() if a < 21]
+
+                if not len(player_list):
+                    pot.clear_bet()
+                    pot.clear_pot()
+                    return 'Player BUSTED!'
+
+                if not len(dealer_list):
+                    stack.add(pot.pot)
+                    pot.clear_bet()
+                    pot.clear_pot()
+                    return 'Dealer BUSTED!'
+
+                player_list.sort()
+                dealer_list.sort()
+
+                player_best = player_list.pop()
+                dealer_best = dealer_list.pop()
+
+                if player_best < dealer_best:
+                    pot.clear_bet()
+                    pot.clear_pot()
+                    return 'Dealer wins!'
+                elif player_best > dealer_best:
+                    stack.add(pot.pot)
+                    pot.clear_bet()
+                    pot.clear_pot()
+                    return 'Player wins!'
+                else:
+                    pot.clear_bet()
+                    return 'PUSH!'
 
         # ======================================================================================
         #  PLAY GAME
@@ -137,6 +232,17 @@ def main_stack():
         def play():
             while True:
                 redraw_screen()
+
+                # cere betul initial
+                while True:
+                    try:
+                        bet = 0
+                        while place_bet(bet):
+                            redraw_screen()
+                            bet = int(prompt('Place your bet!'))
+                        break
+                    except ValueError:
+                        redraw_screen()
 
                 # primele doua carti
                 for i in range(2):
@@ -149,62 +255,93 @@ def main_stack():
                         dealer_hand.hide_card()
                     redraw_screen()
 
-                # cere betul
-                while True:
-                    try:
-                        bet = 0
-                        while place_bet(bet):
-                            redraw_screen()
-                            bet = int(prompt('Place your bet!'))
-                        break
-                    except ValueError:
+                # Decision
+                choices = ['d', 's']
+                choice = ''
+                msg = 'Double Down?/Surrender? (d/s)'
+                if len(dealer_hand.eval()) > 1 and 21 in player_hand.eval():
+                    choices = ['y', 'n']
+                    msg = 'Even Money? yes/no (y/n)'
+                while choice not in choices:
+                    choice = prompt(msg)
+                    redraw_screen()
+                # Double Down
+                if choice == 'd':
+                    while double_down():
+                        choice = prompt(msg)
                         redraw_screen()
-
-                # player's turn
-                while True:
-                    p = prompt('Hit?/Stay? (h/s)')
-                    if p == 'h':
-                        play_hand()
                     redraw_screen()
                     winner = check_winner('player')
-                    if p == 's' or winner:
-                        break
+                    if winner:
+                        print(winner)
+                        sleep(5)
+                        return
+                # Surrender
+                if choice == 's':
+                    surrender()
+                    redraw_screen()
+                    sleep(0.5)
+                    return
+                # Even Money
+                if choice == 'y':
+                    even_money()
+                    redraw_screen()
+                    sleep(0.5)
+                    return
+
+                # continue player's turn
+                # verifica daca e blackjack servit
+                if 21 not in player_hand.eval():
+                    while True:
+                        p = prompt('Hit?/Stay? (h/s)')
+                        if p == 'h':
+                            play_hand()
+                        redraw_screen()
+                        winner = check_winner('player')
+                        if winner:
+                            print(winner)
+                            sleep(5)
+                            return
+                        if p == 's':
+                            break
 
                 # dealer's turn
                 i = 0
                 dealer_hand.unhide()
-                while True:
+                redraw_screen()
+                while max(dealer_hand.eval()) <= 17:
                     i += 1
-                    redraw_screen()
-                    winner = check_winner()
-                    if winner or i == 6:  # test
-                        return winner
-                    play_hand('dealer')
                     sleep(1)
+                    play_hand('dealer')
+                    redraw_screen()
+                winner = check_winner()
+                if winner:
+                    print(winner)
+                    sleep(5)
+                    return
+
 
         #  run play() & exit main_program
         return play()
 
     # run main_program & exit main_stack
-    return main_program()
+    while stack.ammount:
+        main_program()
+
+    return
 
 
 # ======================================================================================
 #  MAIN ENTRY
 # ======================================================================================
 if __name__ == '__main__':
-    main_stack()
-
-# redraw_screen()
-#
-
-#
-# sleep(0.1)
-#
-# for i in range(6):
-#     sleep(0.1)
-#     player_hand.add_card(deck.deal())
-#     redraw_screen()
-#
-# dealer_hand.unhide()
-# redraw_screen()
+    while True:
+        main_stack()
+        resp = ''
+        while resp not in ['y', 'n']:
+            print('You have lost all your money. Play again? (y/n)')
+            response = input(' >>')
+            if response == 'y':
+                break
+            else:
+                exit(0)

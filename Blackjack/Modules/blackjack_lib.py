@@ -104,15 +104,6 @@ class Hand:
 
 
 # ======================================================================================
-#   Extind clasa Hand ca sa tin minte cand are playerul blackjack
-# ======================================================================================
-class PlayerHand(Hand):
-    def __init__(self):
-        Hand.__init__(self)
-        self.blackjack = False
-
-
-# ======================================================================================
 #   Extind clasa Hand ca sa tin minte cartea "intoarsa" a dealerului
 # ======================================================================================
 class DealerHand(Hand):

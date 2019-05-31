@@ -1,5 +1,5 @@
 # ======================================================================================
-#   BLACKJACK  TERMINAL CARD GAME
+#   SIMPLE BLACKJACK  TERMINAL CARD GAME
 # ======================================================================================
 from Modules import blackjack_lib
 from os import system
@@ -27,7 +27,7 @@ def main_stack():
         # amesteca pachetul
         deck.shuffle()
         # creaza mainile pt jucator si pentru dealer
-        player_hand = blackjack_lib.PlayerHand()
+        player_hand = blackjack_lib.Hand()
         dealer_hand = blackjack_lib.DealerHand()
 
         # number_of_spaces = (screen_width - 36) // 2

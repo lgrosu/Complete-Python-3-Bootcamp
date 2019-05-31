@@ -374,10 +374,8 @@ if __name__ == '__main__':
     while True:
         main_stack()
         resp = ''
-        while resp not in ['y', 'n']:
-            print(' You have lost all your money. Play again? (y = yes)')
-            response = input(' >>')
-            if response == 'y':
-                break
-            else:
-                exit(0)
+        print(' You have lost all your money. Play again? (y = yes)')
+        response = input(' >>')
+        if response != 'y':
+            break
+

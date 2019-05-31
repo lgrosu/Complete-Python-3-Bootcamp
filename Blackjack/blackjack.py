@@ -27,7 +27,7 @@ def main_stack():
         # amesteca pachetul
         deck.shuffle()
         # creaza mainile pt jucator si pentru dealer
-        player_hand = blackjack_lib.Hand()
+        player_hand = blackjack_lib.PlayerHand()
         dealer_hand = blackjack_lib.DealerHand()
 
         # number_of_spaces = (screen_width - 36) // 2
@@ -52,14 +52,14 @@ def main_stack():
                 if dealer_hand.eval()[0] > 21:
                     eval_string = f'Hand value: {Style.BRIGHT + Fore.RED + str(dealer_hand.eval()[0]) + Style.RESET_ALL}'
                 else:
-                    eval_string = f'Hand value: {Style.BRIGHT + Fore.BLUE + str(dealer_hand.eval()[0]) + Style.RESET_ALL}'
+                    eval_string = f'Hand value: {Style.BRIGHT + Fore.LIGHTGREEN_EX + str(dealer_hand.eval()[0]) + Style.RESET_ALL}'
 
                 for j in range(1, len(dealer_hand.eval())):
                     eval_count += len(f' or {str(dealer_hand.eval()[j])}')
                     if dealer_hand.eval()[j] > 21:
                         eval_string += f' or {Style.BRIGHT + Fore.RED + str(dealer_hand.eval()[j]) + Style.RESET_ALL}'
                     else:
-                        eval_string += f' or {Style.BRIGHT + Fore.BLUE + str(dealer_hand.eval()[j]) + Style.RESET_ALL}'
+                        eval_string += f' or {Style.BRIGHT + Fore.LIGHTGREEN_EX + str(dealer_hand.eval()[j]) + Style.RESET_ALL}'
 
                 if dealer_hand.hidden_card:
                     print(f' Dealer:{dealer_hand}' + ' ' * (screen_width - dealer_hand.number_of_chars - 12 - eval_count) + eval_string)
@@ -74,14 +74,14 @@ def main_stack():
                 if player_hand.eval()[0] > 21:
                     eval_string = f'Hand value: {Style.BRIGHT + Fore.RED + str(player_hand.eval()[0]) + Style.RESET_ALL}'
                 else:
-                    eval_string = f'Hand value: {Style.BRIGHT + Fore.BLUE + str(player_hand.eval()[0]) + Style.RESET_ALL}'
+                    eval_string = f'Hand value: {Style.BRIGHT + Fore.LIGHTGREEN_EX + str(player_hand.eval()[0]) + Style.RESET_ALL}'
 
                 for j in range(1, len(player_hand.eval())):
                     eval_count += len(f' or {str(player_hand.eval()[j])}')
                     if player_hand.eval()[j] > 21:
                         eval_string += f' or {Style.BRIGHT + Fore.RED + str(player_hand.eval()[j]) + Style.RESET_ALL}'
                     else:
-                        eval_string += f' or {Style.BRIGHT + Fore.BLUE + str(player_hand.eval()[j]) + Style.RESET_ALL}'
+                        eval_string += f' or {Style.BRIGHT + Fore.LIGHTGREEN_EX + str(player_hand.eval()[j]) + Style.RESET_ALL}'
 
                 print(f' Player:{player_hand}' + ' ' * (screen_width - player_hand.number_of_chars - 9 - eval_count) + eval_string)
             else:
@@ -159,53 +159,64 @@ def main_stack():
         # ======================================================================================
         def check_winner(turn='dealer'):
             player_busted = True
-            dealer_busted = False
-            if turn != 'dealer':
+            dealer_busted = True
+            if turn == 'player':
                 for number in player_hand.eval():
                     if number < 21:
                         player_busted = False
                     elif number == 21:
-                        stack.add(pot.pot * 2)
-                        pot.clear_bet()
-                        pot.clear_pot()
-                        return 'BLACKJACK!'
+                        return 'blackjack'
 
                 if player_busted:
                     pot.clear_bet()
                     pot.clear_pot()
-                    return 'Player BUSTED!'
+                    return ' Player BUSTED!'
                 return 0
-            else:
+            else:  # Dealer's Turn
+                # check for blackjack
+                if 21 in player_hand.eval():
+                    if 21 in dealer_hand.eval():
+                        pot.clear_bet()
+                        return ' PUSH!'
+                    else:
+                        if turn != 'intermediar':
+                            stack.add(pot.pot + pot.bet * 2)
+                            pot.clear_bet()
+                            pot.clear_pot()
+                            return ' BLACKJACK! Player wins.'
+
                 for number in dealer_hand.eval():
                     if number < 21:
                         dealer_busted = False
                     elif number == 21:
-                        if 21 in player_hand.eval():
-                            pot.clear_bet()
-                            return 'PUSH!'
-                        else:
-                            pot.clear_bet()
-                            pot.clear_pot()
-                            return 'Dealer BLACKJACK! Dealer wins.'
-                if dealer_busted:
-                    stack.add(pot.pot)
-                    pot.clear_bet()
-                    pot.clear_pot()
-                    return 'Dealer BUSTED!'
+                        pot.clear_bet()
+                        pot.clear_pot()
+                        return ' Dealer BLACKJACK! Dealer wins.'
+                if turn != 'intermediar':
+                    if dealer_busted:
+                        stack.add(pot.pot + pot.bet)
+                        pot.clear_bet()
+                        pot.clear_pot()
+                        return ' Dealer BUSTED!'
 
-                player_list = [a for a in player_hand.eval() if a < 21]
-                dealer_list = [a for a in dealer_hand.eval() if a < 21]
+                if turn != 'intermediar':
+                    player_list = [a for a in player_hand.eval() if a < 21]
+                    dealer_list = [a for a in dealer_hand.eval() if a < 21]
+                else:
+                    player_list = [a for a in player_hand.eval() if a <= 21]
+                    dealer_list = [a for a in dealer_hand.eval() if a <= 21]
 
                 if not len(player_list):
                     pot.clear_bet()
                     pot.clear_pot()
-                    return 'Player BUSTED!'
+                    return ' Player BUSTED!'
 
-                if not len(dealer_list):
-                    stack.add(pot.pot)
-                    pot.clear_bet()
-                    pot.clear_pot()
-                    return 'Dealer BUSTED!'
+                if turn != 'intermediar':
+                    if not len(dealer_list):
+                        stack.add(pot.pot + pot.bet)
+                        pot.clear_bet()
+                        pot.clear_pot()
+                        return ' Dealer BUSTED!'
 
                 player_list.sort()
                 dealer_list.sort()
@@ -216,15 +227,16 @@ def main_stack():
                 if player_best < dealer_best:
                     pot.clear_bet()
                     pot.clear_pot()
-                    return 'Dealer wins!'
+                    return ' Dealer wins!'
                 elif player_best > dealer_best:
-                    stack.add(pot.pot)
-                    pot.clear_bet()
-                    pot.clear_pot()
-                    return 'Player wins!'
+                    if turn != 'intermediar':
+                        stack.add(pot.pot + pot.bet)
+                        pot.clear_bet()
+                        pot.clear_pot()
+                        return ' Player wins!'
                 else:
                     pot.clear_bet()
-                    return 'PUSH!'
+                    return ' PUSH!'
 
         # ======================================================================================
         #  PLAY GAME
@@ -273,9 +285,14 @@ def main_stack():
                     redraw_screen()
                     winner = check_winner('player')
                     if winner:
-                        print(winner)
-                        sleep(5)
-                        return
+                        if winner != 'blackjack':
+                            print(winner)
+                            prompt('Press Enter to continue...')
+                            return
+                        else:
+                            print(' BLAKJACK! Wait for the dealer to play...')
+                            sleep(2)
+
                 # Surrender
                 if choice == 's':
                     surrender()
@@ -291,35 +308,54 @@ def main_stack():
 
                 # continue player's turn
                 # verifica daca e blackjack servit
-                if 21 not in player_hand.eval():
-                    while True:
-                        p = prompt('Hit?/Stay? (h/s)')
-                        if p == 'h':
-                            play_hand()
-                        redraw_screen()
-                        winner = check_winner('player')
-                        if winner:
+                while True:
+                    if 21 in player_hand.eval():
+                        break
+                    p = prompt('Hit?/Stay? (h/s)')
+                    if p == 'h':
+                        play_hand()
+                    redraw_screen()
+                    winner = check_winner('player')
+                    if winner:
+                        if winner != 'blackjack':
                             print(winner)
-                            sleep(5)
+                            prompt('Press Enter to continue...')
                             return
-                        if p == 's':
-                            break
+                        else:
+                            print(' BLAKJACK! Wait for the dealer to play...')
+                            sleep(2)
+                    if p == 's':
+                        break
 
                 # dealer's turn
                 i = 0
                 dealer_hand.unhide()
+                sleep(1)
                 redraw_screen()
-                while max(dealer_hand.eval()) <= 17:
-                    i += 1
-                    sleep(1)
-                    play_hand('dealer')
-                    redraw_screen()
+                winner = check_winner('intermediar')
+                if winner:
+                    print(winner)
+                    prompt('Press Enter to continue...')
+                    return
+                if min(dealer_hand.eval()) <= 17:
+                    while True:
+                        i += 1
+                        sleep(1)
+                        play_hand('dealer')
+                        redraw_screen()
+                        if min(dealer_hand.eval()) > 17:
+                            break
+                        winner = check_winner('intermediar')
+                        if winner:
+                            print(winner)
+                            prompt('Press Enter to continue...')
+                            return
+
                 winner = check_winner()
                 if winner:
                     print(winner)
-                    sleep(5)
+                    prompt('Press Enter to continue...')
                     return
-
 
         #  run play() & exit main_program
         return play()
@@ -339,7 +375,7 @@ if __name__ == '__main__':
         main_stack()
         resp = ''
         while resp not in ['y', 'n']:
-            print('You have lost all your money. Play again? (y/n)')
+            print(' You have lost all your money. Play again? (y = yes)')
             response = input(' >>')
             if response == 'y':
                 break

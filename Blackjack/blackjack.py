@@ -9,6 +9,8 @@ from time import sleep
 from pyfiglet import Figlet
 from colorama import Fore, Style
 
+past_17_rule = True
+
 
 def main_stack():
     # creaza potul
@@ -104,7 +106,7 @@ def main_stack():
         #  PLACE BET
         # ======================================================================================
         def place_bet(bet):
-            if bet != 0:
+            if bet > 0:
                 response = stack.withdraw(bet)
                 if response['success'] == 1:
                     pot.add(bet)
@@ -270,7 +272,7 @@ def main_stack():
                 # Decision
                 choices = ['d', 's']
                 choice = ''
-                msg = 'Double Down?/Surrender? (d/s)'
+                msg = 'Double?/Surrender? (d/s)'
                 if len(dealer_hand.eval()) > 1 and 21 in player_hand.eval():
                     choices = ['y', 'n']
                     msg = 'Even Money? yes/no (y/n)'
@@ -337,13 +339,17 @@ def main_stack():
                     print(winner)
                     prompt('Press Enter to continue...')
                     return
-                if min(dealer_hand.eval()) <= 17:
+                if past_17_rule:
+                    best_player_hand_value = 17
+                else:
+                    best_player_hand_value = 21 - min([21 - a for a in player_hand.eval()])  # valoarea cea mai apropiata de 21 a playerului
+                if min(dealer_hand.eval()) <= best_player_hand_value:
                     while True:
                         i += 1
                         sleep(1)
                         play_hand('dealer')
                         redraw_screen()
-                        if min(dealer_hand.eval()) > 17:
+                        if min(dealer_hand.eval()) > best_player_hand_value:
                             break
                         winner = check_winner('intermediar')
                         if winner:
@@ -378,4 +384,3 @@ if __name__ == '__main__':
         response = input(' >>')
         if response != 'y':
             break
-
